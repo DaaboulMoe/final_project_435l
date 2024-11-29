@@ -1,7 +1,7 @@
 services:
   db:
     image: postgres:15
-    container_name: postgres_db
+    container_name: postgres_db_customer
     environment:
       POSTGRES_USER: user
       POSTGRES_PASSWORD: password
@@ -10,6 +10,8 @@ services:
       - "5432:5432"
     volumes:
       - db_data:/var/lib/postgresql/data
+    networks:
+      - app_network
 
   customers:
     build:
@@ -23,6 +25,13 @@ services:
       - "5001:5000"
     depends_on:
       - db
+    networks:
+      - app_network
 
 volumes:
   db_data:
+
+
+networks:
+  app_network:
+    external: true

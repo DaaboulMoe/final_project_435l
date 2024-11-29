@@ -20,6 +20,20 @@ def add_product():
         db.session.rollback()
         return jsonify({"error": "Product could not be added"}), 400
 
+@app.route('/inventory', methods=['GET'])
+def get_all_products():
+    products = Product.query.all() 
+    products_list = [product.to_dict() for product in products] 
+    return jsonify(products_list), 200
+
+@app.route('/inventory/<int:product_id>', methods=['GET'])
+def get_product_details(product_id):
+    product = Product.query.get(product_id)
+    if product:
+        return jsonify(product.to_dict()), 200
+    else:
+        return jsonify({"error": "Product not found"}), 404
+
 @app.route('/inventory/<int:product_id>', methods=['DELETE'])
 def delete_product(product_id):
     product = Product.query.get(product_id)

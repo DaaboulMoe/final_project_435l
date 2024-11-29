@@ -1,28 +1,30 @@
 services:
   db:
     image: postgres:15
-    container_name: postgres_db_inventory
+    container_name: postgres_db_sales
     environment:
       POSTGRES_USER: user
       POSTGRES_PASSWORD: password
-      POSTGRES_DB: inventory_db
+      POSTGRES_DB: sales_db
     ports:
-      - "5433:5432"
+      - "5434:5432"
     volumes:
       - db_data:/var/lib/postgresql/data
     networks:
       - app_network
 
-  inventory:
+  sales:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: inventory_service
+    container_name: sales_service
     environment:
       FLASK_APP: app.py
       FLASK_ENV: development
+      CUSTOMERS_SERVICE_URL: http://customers_service:5000
+      INVENTORY_SERVICE_URL: http://inventory_service:5000
     ports:
-      - "5002:5000"
+      - "5003:5000"
     depends_on:
       - db
     networks:
@@ -30,7 +32,6 @@ services:
 
 volumes:
   db_data:
-
 
 networks:
   app_network:
