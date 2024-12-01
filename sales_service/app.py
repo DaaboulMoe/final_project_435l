@@ -13,6 +13,20 @@ INVENTORY_SERVICE_URL = 'http://inventory_service:5000'
 
 @app.route('/goods', methods=['GET'])
 def display_goods():
+    """
+    Display all goods available in the inventory.
+
+    **Endpoint:** ``/goods``
+
+    **Method:** ``GET``
+
+    **Responses:**
+        - 200: A list of all goods with their names and prices.
+        - 500: Unable to fetch goods.
+
+    :return: JSON response with a list of goods or error message and status code.
+    :rtype: tuple
+    """
     response = requests.get(f'{INVENTORY_SERVICE_URL}/inventory')
     if response.status_code == 200:
         products = response.json()
@@ -22,6 +36,25 @@ def display_goods():
 
 @app.route('/goods/<int:product_id>', methods=['GET'])
 def get_goods_details(product_id):
+    """
+    Get details of a specific product by its ID.
+
+    **Endpoint:** ``/goods/<product_id>``
+
+    **Method:** ``GET``
+
+    **URL Parameters:**
+        - `product_id` (int): The ID of the product.
+
+    **Responses:**
+        - 200: Product details.
+        - 404: Product not found.
+
+    :param product_id: The ID of the product.
+    :type product_id: int
+    :return: JSON response with product details or error message and status code.
+    :rtype: tuple
+    """
     response = requests.get(f'{INVENTORY_SERVICE_URL}/inventory/{product_id}')
     if response.status_code == 200:
         return jsonify(response.json()), 200
@@ -30,6 +63,35 @@ def get_goods_details(product_id):
 
 @app.route('/sale', methods=['POST'])
 def make_sale():
+    """
+    Make a sale for a specific product.
+
+    **Endpoint:** ``/sale``
+
+    **Method:** ``POST``
+
+    **Request Body:**
+        - `product_name` (str): The name of the product.
+        - `username` (str): The username of the customer.
+        - `quantity` (int, optional): The quantity of the product to be purchased. Defaults to 1.
+
+    **Responses:**
+        - 200: Sale successful.
+        - 400: Insufficient stock or funds.
+        - 404: Customer or product not found.
+        - 500: Failed to update customer wallet or product stock.
+
+    **Process:**
+        - Fetch product details from the inventory service.
+        - Fetch customer details from the customer service.
+        - Check if the product is in stock and if the customer has sufficient funds.
+        - Deduct the total price from the customer's wallet.
+        - Update the product stock in the inventory.
+        - Create a sale record in the database.
+
+    :return: JSON response with a message and status code.
+    :rtype: tuple
+    """
     try:
         data = request.json
         product_name = data.get('product_name')
