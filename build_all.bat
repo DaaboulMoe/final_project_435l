@@ -1,5 +1,7 @@
 @echo off
 
+docker network create app_network
+
 REM Navigate to the customers service directory, build and compose
 echo Building and starting customers service...
 cd customer_service
