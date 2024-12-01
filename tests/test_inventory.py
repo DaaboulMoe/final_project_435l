@@ -1,6 +1,5 @@
 import requests
 
-# Base URL for the inventory service
 BASE_URL = "http://localhost:5002"
 
 def test_add_product():
@@ -22,7 +21,7 @@ def test_get_all_products():
     assert response.status_code == 200
     products = response.json()
     assert isinstance(products, list)
-    assert len(products) > 0  # Ensure there is at least one product
+    assert len(products) > 0 
 
 def test_get_product_details():
     """Test fetching details of a specific product."""
