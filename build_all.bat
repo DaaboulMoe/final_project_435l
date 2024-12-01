@@ -20,5 +20,11 @@ cd sales_service
 docker-compose up --build -d
 cd ..
 
+REM Navigate to the reviews service directory, build and compose
+echo Building and starting reviews service...
+cd reviews_service
+docker-compose up --build -d
+cd ..
+
 echo All services are up and running.
 pause
