@@ -7,6 +7,40 @@ import pstats
 import io
 import os
 from functools import wraps
+from memory_profiler import profile
+
+
+# Memory profiling decorator
+def memory_profile_route(func):
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        # Create an in-memory buffer to capture memory profiling
+        pr = cProfile.Profile()
+        pr.enable()
+
+        # Profile memory using memory_profiler
+        @profile(precision=4)
+        def profiled_func():
+            return func(*args, **kwargs)
+
+        # Call the function with memory profiling
+        response = profiled_func()
+
+        # Log profiling data
+        log_dir = "profiling_logs"
+        os.makedirs(log_dir, exist_ok=True)
+        log_file = os.path.join(log_dir, f"{func.__name__}_memory_profile.log")
+
+        with open(log_file, "w") as f:
+            f.write(f"Memory usage for {func.__name__}:\n")
+            s = io.StringIO()
+            ps = pstats.Stats(pr, stream=s).sort_stats("cumulative")
+            ps.print_stats()
+            f.write(s.getvalue())
+
+        return response
+
+    return wrapper
 
 
 def profile_route(func):
@@ -54,6 +88,7 @@ INVENTORY_SERVICE_URL = "http://inventory_service:5000"
 
 @app.route("/goods", methods=["GET"])
 @profile_route
+@memory_profile_route
 def display_goods():
     """
     Display all goods available in the inventory.
@@ -82,6 +117,7 @@ def display_goods():
 
 @app.route("/goods/<int:product_id>", methods=["GET"])
 @profile_route
+@memory_profile_route
 def get_goods_details(product_id):
     """
     Get details of a specific product by its ID.
@@ -110,6 +146,7 @@ def get_goods_details(product_id):
 
 @app.route("/sale", methods=["POST"])
 @profile_route
+@memory_profile_route
 def make_sale():
     """
     Make a sale for a specific product.
@@ -121,7 +158,8 @@ def make_sale():
     **Request Body:**
         - `product_name` (str): The name of the product.
         - `username` (str): The username of the customer.
-        @profile_route- `quantity` (int, optional): The quantity of the product to be purchased.
+        @profile_route
+        @memory_profile_route- `quantity` (int, optional): The quantity of the product to be purchased.
         Defaults to 1.
 
     **Responses:**
