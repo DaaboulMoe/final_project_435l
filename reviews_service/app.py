@@ -14,7 +14,28 @@ INVENTORY_SERVICE_URL = 'http://inventory_service:5000'
 
 @app.route('/reviews', methods=['POST'])
 def submit_review():
-    """Submit a new review for a product"""
+    """
+    Submit a new review for a product.
+
+    This endpoint allows customers to submit a review for a specific product. 
+    The review must include a product ID, rating (between 0 and 5), and the 
+    customer's authentication credentials (username and password). The 
+    customer is authenticated, the product is validated, and the review is 
+    added to the database.
+
+    **Request JSON body**:
+        - product_id (int): The ID of the product being reviewed.
+        - rating (int): A rating between 0 and 5.
+        - username (str): The customer's username.
+        - password (str): The customer's password.
+        - comment (str, optional): An optional comment for the review.
+
+    **Response**:
+        - 201 Created: Review successfully added.
+        - 400 Bad Request: Missing required fields or invalid data (e.g., rating not between 0-5).
+        - 403 Forbidden: Unauthorized customer or invalid credentials.
+        - 404 Not Found: Product not found.
+    """
     data = request.get_json()
     
     required_fields = ['product_id', 'rating', 'username', 'password']
@@ -66,7 +87,25 @@ def submit_review():
 
 @app.route('/reviews/<int:review_id>', methods=['PUT'])
 def update_review(review_id):
-    """Update an existing review"""
+    """
+    Update an existing review.
+
+    This endpoint allows customers to update their existing reviews. The customer 
+    must authenticate, and the review can only be updated by the customer who originally 
+    created it. The rating and comment fields can be modified.
+
+    **Request JSON body**:
+        - username (str): The customer's username.
+        - password (str): The customer's password.
+        - rating (int, optional): New rating between 0 and 5.
+        - comment (str, optional): New comment.
+
+    **Response**:
+        - 200 OK: Review successfully updated.
+        - 400 Bad Request: Missing required fields or invalid data.
+        - 403 Forbidden: Unauthorized customer or invalid credentials.
+        - 404 Not Found: Review not found.
+    """
     data = request.get_json()
     review = Review.query.get_or_404(review_id)
     
@@ -112,7 +151,23 @@ def update_review(review_id):
 
 @app.route('/reviews/<int:review_id>', methods=['DELETE'])
 def delete_review(review_id):
-    """Delete a review"""
+    """
+    Delete a review.
+
+    This endpoint allows a customer to delete their review for a product. 
+    The customer must authenticate, and the review can only be deleted by 
+    the customer who originally created it.
+
+    **Request JSON body**:
+        - username (str): The customer's username.
+        - password (str): The customer's password.
+
+    **Response**:
+        - 200 OK: Review successfully deleted.
+        - 400 Bad Request: Missing required fields.
+        - 403 Forbidden: Unauthorized customer or invalid credentials.
+        - 404 Not Found: Review not found.
+    """
     data = request.get_json()
     review = Review.query.get_or_404(review_id)
     
@@ -141,19 +196,53 @@ def delete_review(review_id):
 
 @app.route('/products/<int:product_id>/reviews', methods=['GET'])
 def get_product_reviews(product_id):
-    """Get all reviews for a specific product"""
+    """
+    Get all reviews for a specific product.
+
+    This endpoint retrieves all reviews for a specific product by its product ID.
+
+    **Response**:
+        - 200 OK: List of reviews for the specified product.
+        - 404 Not Found: Product not found or no reviews for the product.
+    """
     reviews = Review.query.filter_by(product_id=product_id).all()
     return jsonify([review.to_dict() for review in reviews]), 200
 
 @app.route('/customers/<int:customer_id>/reviews', methods=['GET'])
 def get_customer_reviews(customer_id):
-    """Get all reviews by a specific customer"""
+    """
+    Get all reviews by a specific customer.
+
+    This endpoint retrieves all reviews submitted by a specific customer using 
+    their customer ID.
+
+    **Response**:
+        - 200 OK: List of reviews submitted by the specified customer.
+        - 404 Not Found: Customer not found or no reviews submitted by the customer.
+    """
     reviews = Review.query.filter_by(customer_id=customer_id).all()
     return jsonify([review.to_dict() for review in reviews]), 200
 
 @app.route('/reviews/<int:review_id>/moderate', methods=['POST'])
 def moderate_review(review_id):
-    """Moderate a review (admin only)"""
+    """
+    Moderate a review (admin only).
+
+    This endpoint allows an admin to moderate a review by updating its 
+    moderation status. The admin must authenticate using a special admin username 
+    and password.
+
+    **Request JSON body**:
+        - username (str): The admin's username (must be "admin").
+        - password (str): The admin's password.
+        - moderated (bool): New moderation status for the review.
+
+    **Response**:
+        - 200 OK: Review successfully moderated.
+        - 400 Bad Request: Missing required fields or invalid data.
+        - 403 Forbidden: Unauthorized or invalid admin credentials.
+        - 404 Not Found: Review not found.
+    """
     data = request.get_json()
     review = Review.query.get_or_404(review_id)
 
@@ -187,7 +276,15 @@ def moderate_review(review_id):
 
 @app.route('/reviews/<int:review_id>', methods=['GET'])
 def get_review_details(review_id):
-    """Get detailed information about a specific review"""
+    """
+    Get detailed information about a specific review.
+
+    This endpoint retrieves detailed information about a specific review by its review ID.
+
+    **Response**:
+        - 200 OK: Review details successfully retrieved.
+        - 404 Not Found: Review not found.
+    """
     review = Review.query.get_or_404(review_id)
     return jsonify(review.to_dict()), 200
 
