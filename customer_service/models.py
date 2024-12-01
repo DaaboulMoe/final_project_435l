@@ -10,6 +10,7 @@ class Customer(db.Model):
     gender = db.Column(db.String(10), nullable=False)
     marital_status = db.Column(db.String(20), nullable=False)
     wallet_balance = db.Column(db.Float, default=0)
+    is_admin = db.Column(db.Boolean, default=False)
 
     def to_dict(self):
         return {
@@ -20,5 +21,5 @@ class Customer(db.Model):
             "address": self.address,
             "gender": self.gender,
             "marital_status": self.marital_status,
-            "wallet_balance": self.wallet_balance
+            "wallet_balance": self.wallet_balance, 
         }

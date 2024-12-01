@@ -1,35 +1,35 @@
 services:
   db:
     image: postgres:15
-    container_name: postgres_db_sales
+    container_name: postgres_db_reviews
     environment:
       POSTGRES_USER: user
       POSTGRES_PASSWORD: password
-      POSTGRES_DB: sales_db
+      POSTGRES_DB: reviews_db
     ports:
-      - "5434:5432"
+      - "5435:5432"
     volumes:
       - db_data:/var/lib/postgresql/data
     networks:
       - app_network
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U user -d sales_db" ]
+      test: [ "CMD-SHELL", "pg_isready -U user -d reviews_db" ]
       interval: 10s
       timeout: 5s
       retries: 5
 
-  sales:
+  reviews:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: sales_service
+    container_name: reviews_service
     environment:
       FLASK_APP: app.py
       FLASK_ENV: development
       CUSTOMERS_SERVICE_URL: http://customers_service:5000
       INVENTORY_SERVICE_URL: http://inventory_service:5000
     ports:
-      - "5003:5000"
+      - "5004:5000"
     depends_on:
       db:
         condition: service_healthy

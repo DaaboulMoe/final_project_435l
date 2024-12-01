@@ -8,6 +8,19 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://user:password@db/customers
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 init_db(app)
 
+@app.route('/auth', methods=['POST'])
+def authenticate_customer():
+    try:
+        data = request.json 
+        username = data.get("username")
+        password = data.get("password")
+        customer = Customer.query.filter_by(username=username).first()
+        if password == customer.password:
+            return jsonify({"id": customer.id}), 200
+    except :
+        db.session.rollback()
+        return jsonify({"error": "Customer not authenticated or does not exist."}), 400
+
 @app.route('/customers', methods=['POST'])
 def register_customer():
     try:

@@ -8,6 +8,39 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://user:password@db/inventory
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 init_db(app)
 
+@app.route('/inventory/validate/<int:product_id>', methods=['GET'])
+def validate_product(product_id):
+    """
+    Validate if a product exists in the database.
+
+    **Endpoint:** ``/inventory/validate/<product_id>``
+
+    **Method:** ``GET``
+
+    **URL Parameters:**
+        - `product_id` (int): The ID of the product to validate.
+
+    **Responses:**
+        - 200: Product exists in the database.
+        - 404: Product not found.
+
+    :param product_id: The ID of the product.
+    :type product_id: int
+    :return: JSON response indicating if the product exists and status code.
+    :rtype: tuple
+    """
+    product = Product.query.get(product_id)
+    if product:
+        return jsonify({
+            "exists": True,
+            "product_id": product_id
+        }), 200
+    else:
+        return jsonify({
+            "exists": False,
+            "product_id": product_id
+        }), 404
+    
 @app.route('/inventory', methods=['POST'])
 def add_product():
     """
